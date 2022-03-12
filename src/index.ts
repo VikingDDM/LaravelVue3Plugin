@@ -1,7 +1,6 @@
 import { reactive, Plugin, computed, ComputedRef } from 'vue'
 import { OptionsInterface } from './interfaces/options'
 import { LanguageInterface } from './interfaces/language'
-import { LanguageJsonFileInterface } from './interfaces/language-json-file'
 import { ReplacementsInterface } from './interfaces/replacements'
 import { choose } from './pluralization'
 
@@ -52,7 +51,8 @@ export function loadLanguageAsync(lang: string): Promise<string | void> {
     return Promise.resolve(setLanguage(loadedLang))
   }
 
-  return resolveLang(options.resolve, lang)
+  return options
+    .resolve(lang)
     .then(({ default: messages }) => {
       const data: LanguageInterface = { lang, messages }
       loaded.push(data)
@@ -132,19 +132,6 @@ function setLanguage({ lang, messages }: LanguageInterface): string {
   }
 
   return lang
-}
-
-/**
- * It resolves the language file or data, from direct data, require or Promise.
- */
-function resolveLang(callable: Function, lang: string): Promise<LanguageJsonFileInterface> {
-  const data = callable(lang)
-
-  if (data instanceof Promise) {
-    return data
-  }
-
-  return new Promise((resolve) => resolve({ default: data }))
 }
 
 /**
